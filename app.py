@@ -32,6 +32,33 @@ os.makedirs(PHOTO_DIR, exist_ok=True)
 
 db.init_db()
 
+
+def _seed_demo_data():
+    """On Vercel, pre-load sample CSV so the app works without manual upload."""
+    if not IS_VERCEL:
+        return
+    # Check if data already loaded in this instance
+    counts = db.get_global_counts()
+    if counts.get("total_devices", 0) > 0:
+        return
+    csv_path = os.path.join(BASE_DIR, "sample_data.csv")
+    if not os.path.exists(csv_path):
+        return
+    with open(csv_path, "r", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            pc = row["partner_code"].strip()
+            pn = row["partner_name"].strip()
+            city = row.get("city", "").strip()
+            did = row["device_id"].strip()
+            if not all([pc, pn, did]):
+                continue
+            db.upsert_partner(pc, pn, city)
+            db.upsert_device(pc, did)
+
+
+_seed_demo_data()
+
 # Mount static files
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 if not IS_VERCEL:
