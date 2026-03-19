@@ -4,7 +4,8 @@ import hashlib
 import random
 from datetime import datetime
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "netbox_inventory.db")
+IS_VERCEL = os.environ.get("VERCEL", False)
+DB_PATH = "/tmp/netbox_inventory.db" if IS_VERCEL else os.path.join(os.path.dirname(os.path.abspath(__file__)), "netbox_inventory.db")
 
 
 def get_connection():

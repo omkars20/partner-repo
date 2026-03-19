@@ -25,7 +25,8 @@ app.add_middleware(
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
+IS_VERCEL = os.environ.get("VERCEL", False)
+UPLOAD_DIR = "/tmp/uploads" if IS_VERCEL else os.path.join(BASE_DIR, "uploads")
 PHOTO_DIR = os.path.join(UPLOAD_DIR, "photos")
 os.makedirs(PHOTO_DIR, exist_ok=True)
 
@@ -33,7 +34,8 @@ db.init_db()
 
 # Mount static files
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+if not IS_VERCEL:
+    app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 
 # ── Pages ───────────────────────────────────────────────────────────
