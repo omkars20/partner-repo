@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ops Dashboard | Device Inventory</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="container" style="padding-bottom:60px;">
+        <a href="/" class="back-link" style="margin-top:24px;">← Back to Home</a>
+
+        <div class="page-header">
+            <h1>Ops Dashboard</h1>
+            <p>Upload device CSV to auto-assign to partners, monitor verification progress.</p>
+        </div>
+
+        <!-- ── CSV Upload Section ─────────────────────────────── -->
+        <div class="glass-card mb-24" id="upload-section">
+            <h3 style="margin-bottom:16px;">Upload Partner-Device CSV</h3>
+            <p style="color:var(--text-secondary); margin-bottom:16px; font-size:0.9rem;">
+                Uploading a CSV auto-assigns devices to each partner listed in the file.
+                Partners will see their assignment when they log in.
+            </p>
+            <div class="upload-zone" id="upload-zone">
+                <span class="upload-icon">📄</span>
+                <div class="upload-text">Drag & drop your CSV file here, or click to browse</div>
+                <div class="upload-hint">Required columns: partner_code, partner_name, device_id (optional: city)</div>
+                <input type="file" id="csv-file-input" accept=".csv" style="display:none;">
+            </div>
+            <div id="upload-status" class="mt-16 text-center hidden">
+                <div class="spinner"></div>
+                <span style="margin-left:8px;">Uploading…</span>
+            </div>
+            <div id="upload-result" class="mt-16 hidden"></div>
+        </div>
+
+        <!-- ── Summary Stats ──────────────────────────────────── -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card blue">
+                <div class="stat-number" id="stat-partners">—</div>
+                <div class="stat-label">Partners</div>
+            </div>
+            <div class="stat-card yellow">
+                <div class="stat-number" id="stat-total">—</div>
+                <div class="stat-label">Total Devices</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-number" id="stat-installed">—</div>
+                <div class="stat-label">Installed</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-number" id="stat-ocr-verified">—</div>
+                <div class="stat-label">OCR Verified</div>
+            </div>
+            <div class="stat-card red">
+                <div class="stat-number" id="stat-unaccounted">—</div>
+                <div class="stat-label">Unaccounted</div>
+            </div>
+        </div>
+
+        <!-- ── Partner Table ──────────────────────────────────── -->
+        <div class="glass-card">
+            <div class="flex-between mb-16" style="flex-wrap:wrap; gap:12px;">
+                <h3>Partner Inventory Status</h3>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <div class="search-bar" style="margin-bottom:0;">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="partner-search" class="form-input" placeholder="Search partners…">
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="export-all-btn">Export All</button>
+                    <button class="btn btn-outline btn-sm" id="refresh-btn">Refresh</button>
+                </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="data-table" id="partner-table">
+                    <thead>
+                        <tr>
+                            <th>Partner</th>
+                            <th>City</th>
+                            <th>Devices</th>
+                            <th>Installed</th>
+                            <th>OCR Verified</th>
+                            <th>Unaccounted</th>
+                            <th>Partner Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="partner-table-body">
+                        <tr>
+                            <td colspan="8" class="text-center" style="padding:40px; color:var(--text-muted);">
+                                Upload a CSV to auto-assign devices to partners
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Partner Detail Modal ────────────────────────────────── -->
+    <div class="modal-overlay hidden" id="detail-modal">
+        <div class="modal-content" style="max-width:850px;">
+            <div class="modal-header">
+                <h3 id="detail-modal-title">Partner Detail</h3>
+                <button class="modal-close" id="detail-modal-close">&times;</button>
+            </div>
+
+            <!-- Partner Activity Info -->
+            <div id="partner-activity-info" class="mb-24" style="padding:16px; background:var(--bg-glass); border-radius:var(--radius-sm);"></div>
+
+            <div class="stats-grid" id="detail-stats" style="margin-bottom:20px;"></div>
+
+            <!-- Devices with reasons (shown prominently) -->
+            <div id="reason-alert-section" class="mb-24" style="display:none;"></div>
+
+            <div style="overflow-x:auto;">
+                <table class="data-table" id="detail-table">
+                    <thead>
+                        <tr>
+                            <th>Device ID</th>
+                            <th>Status</th>
+                            <th>Customer Info</th>
+                            <th>OCR Photo</th>
+                            <th>Matched At</th>
+                            <th>Partner Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detail-table-body"></tbody>
+                </table>
+            </div>
+
+            <div style="margin-top:20px; display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap;">
+                <button class="btn btn-primary btn-sm" id="run-ping-btn">Run Ping Check</button>
+                <button class="btn btn-primary btn-sm" id="export-partner-btn">Export Report</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+
+</html>

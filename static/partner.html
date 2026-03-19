@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Portal | Device Inventory</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="container">
+        <a href="/" class="back-link" style="margin-top:24px;">← Back to Home</a>
+
+        <!-- ── Login Section ──────────────────────────────────── -->
+        <div id="login-section">
+            <div class="page-header">
+                <h1>Partner Portal</h1>
+                <p>Enter your Partner Code to check device status and verify your inventory.</p>
+            </div>
+
+            <div class="glass-card" style="max-width:460px; margin:0 auto;">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="partner-code-input">Partner Code</label>
+                        <input type="text" id="partner-code-input" class="form-input" placeholder="e.g. PTR001"
+                            autocomplete="off" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;" id="login-btn">
+                        Login & View Devices
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ── Main Section (after login) ──────────────────────── -->
+        <div id="main-section" class="hidden">
+            <div class="page-header" style="padding-bottom:16px;">
+                <h1>Device Inventory</h1>
+                <p id="partner-greeting"></p>
+            </div>
+
+            <!-- Assignment Banner -->
+            <div class="glass-card mb-24" id="assignment-banner" style="border-left:4px solid var(--accent-blue);">
+                <h3 style="margin-bottom:8px; color:var(--accent-blue);">Assignment Details</h3>
+                <div id="assignment-info" style="color:var(--text-secondary);"></div>
+            </div>
+
+            <!-- Step 1: Run Ping Check -->
+            <div id="ping-section" class="glass-card mb-24">
+                <h3 style="margin-bottom:12px;">Step 1: Check Installed Devices</h3>
+                <p style="color:var(--text-secondary); margin-bottom:20px;">
+                    Run a ping check to see which devices are installed at customer homes (online)
+                    and which are still at your location.
+                </p>
+                <button class="btn btn-primary" id="ping-btn">Run Ping Check</button>
+                <div id="ping-result" class="hidden mt-16"></div>
+            </div>
+
+            <!-- Stats (shown after ping) -->
+            <div id="stats-section" class="hidden">
+                <div class="stats-grid">
+                    <div class="stat-card yellow">
+                        <div class="stat-number" id="stat-total">0</div>
+                        <div class="stat-label">Total Devices</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-number" id="stat-installed">0</div>
+                        <div class="stat-label">Installed (Online)</div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="stat-number" id="stat-at-partner">0</div>
+                        <div class="stat-label">At Your Location</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-number" id="stat-ocr-verified">0</div>
+                        <div class="stat-label">Photo Verified</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-number" id="stat-unaccounted">0</div>
+                        <div class="stat-label">Unaccounted</div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Upload Photos for OCR -->
+                <div class="glass-card mb-24" id="ocr-section">
+                    <h3 style="margin-bottom:12px;">Step 2: Verify Remaining Devices</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:20px;">
+                        Upload a photo of the devices at your location. Our system will read the device IDs
+                        from the photo and match them with your inventory.
+                    </p>
+
+                    <div class="upload-zone" id="photo-upload-zone">
+                        <span class="upload-icon">📸</span>
+                        <div class="upload-text">Tap to take a photo or upload an image of your devices</div>
+                        <div class="upload-hint">We'll extract device IDs automatically via OCR</div>
+                        <input type="file" accept="image/*" capture="environment" id="ocr-photo-input" style="display:none;">
+                    </div>
+
+                    <div id="ocr-status" class="hidden mt-16" style="text-align:center;">
+                        <div class="spinner"></div>
+                        <span style="margin-left:8px;">Processing image...</span>
+                    </div>
+
+                    <div id="ocr-result" class="hidden mt-16"></div>
+                </div>
+
+                <!-- Step 3: Reason for unverified devices -->
+                <div class="glass-card mb-24" id="reason-section" style="display:none; border-left:4px solid var(--accent-red);">
+                    <h3 style="margin-bottom:12px;">Can't verify some devices?</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:16px;">
+                        If you can't find or verify some devices, please provide a reason below.
+                        This will be sent to the admin team.
+                    </p>
+                    <div id="unverified-device-checkboxes" class="mb-16"></div>
+                    <div class="form-group">
+                        <label for="reason-input">Reason</label>
+                        <textarea id="reason-input" class="form-input" rows="3"
+                            placeholder="e.g. Device was damaged, Device given to another partner, Device lost during transport..."></textarea>
+                    </div>
+                    <button class="btn btn-danger" id="submit-reason-btn">Submit Reason</button>
+                    <div id="reason-result" class="hidden mt-16"></div>
+                </div>
+
+                <!-- Device Lists -->
+                <div class="glass-card mb-24">
+                    <h3 style="margin-bottom:16px;">Installed Devices (Online)</h3>
+                    <p style="color:var(--text-muted); margin-bottom:16px; font-size:0.9rem;">
+                        These devices are pinging from customer locations.
+                    </p>
+                    <div id="installed-list" class="device-tag-grid"></div>
+                </div>
+
+                <div class="glass-card mb-24">
+                    <div class="flex-between mb-16">
+                        <h3>Devices at Your Location</h3>
+                    </div>
+                    <div id="at-partner-verified" class="mb-24">
+                        <h4 style="color:var(--accent-green); margin-bottom:12px;">Photo Verified</h4>
+                        <div id="verified-list" class="device-tag-grid"></div>
+                    </div>
+                    <div id="at-partner-unverified">
+                        <h4 style="color:var(--accent-red); margin-bottom:12px;">Not Yet Verified</h4>
+                        <div id="unverified-list" class="device-tag-grid"></div>
+                    </div>
+                    <div id="at-partner-with-reason" class="mt-24" style="display:none;">
+                        <h4 style="color:var(--accent-yellow); margin-bottom:12px;">Reason Submitted</h4>
+                        <div id="reason-submitted-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/partner.js"></script>
+</body>
+
+</html>
